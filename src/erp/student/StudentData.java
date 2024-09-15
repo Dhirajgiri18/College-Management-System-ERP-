@@ -1,200 +1,184 @@
 package erp.student;
 
-import java.sql.*;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import erp.database.DataBaseConnection;
 
 public class StudentData {
-	
-	
-	private String Rollnumber;
-	private String Name;
-	private String Course;
-	private String DOB;
-	private String Contact;
-	private String userid;
-	private String EmailId;
+
+	private String rollNumber;
+	private String name;
+	private String course;
+	private String dob;
+	private String contact;
+	private String userId;
+	private String emailId;
 	private String password;
-	
-	public void setRollNumber(String rollnumber)
-	{
-		this.Rollnumber = rollnumber;
+
+	// Setters
+	public void setRollNumber(String rollNumber) {
+		this.rollNumber = rollNumber;
 	}
-	public void setName(String name)
-	{
-		this.Name = name;
+
+	public void setName(String name) {
+		this.name = name;
 	}
-	public void setCourse(String course)
-	{
-		this.Course = course;
+
+	public void setCourse(String course) {
+		this.course = course;
 	}
-	public void setDOB(String dob)
-	{
-		this.DOB = dob;
+
+	public void setDOB(String dob) {
+		this.dob = dob;
 	}
-	public void setContact(String contact)
-	{
-		this.Contact = contact;
+
+	public void setContact(String contact) {
+		this.contact = contact;
 	}
+
 	public void setEmail(String email) {
-		this.EmailId = email;
+		this.emailId = email;
 	}
-//	public void setUserId()
-//	{
-//		this.userid = Name + DOB;
-//	}
-	public String getName()
-	{
-		return Name;
+
+	// Getters
+	public String getName() {
+		return name;
 	}
-	public String getCourse()
-	{
-		return Course;
+
+	public String getCourse() {
+		return course;
 	}
-	public String getRollNumber()
-	{
-		return Rollnumber;
+
+	public String getRollNumber() {
+		return rollNumber;
 	}
-	public String getDOB()
-	{
-		return DOB;
-		
+
+	public String getDOB() {
+		return dob;
 	}
-	public String getContact()
-	{
-		return Contact;
+
+	public String getContact() {
+		return contact;
 	}
+
 	public String getEmail() {
-		return EmailId;
+		return emailId;
 	}
-	public String getUserId()
-	{
-		return userid;
+
+	public String getUserId() {
+		return userId;
 	}
-	public String generateUserId() 
-	{
-		// TODO Auto-generated method stub
-		userid = getName() + Rollnumber;
-		return userid;
+
+	// Generate User ID and Password
+	public String generateUserId() {
+		userId = name + rollNumber;
+		return userId;
 	}
-	public String generatePassword() 
-	{
-		// TODO Auto-generated method stub
-		password = getName() + Rollnumber;
+
+	public String generatePassword() {
+		password = name + rollNumber;
 		return password;
 	}
-	
-	
-	Connection con = DataBaseConnection.getConnection();
 
-	public boolean getStudentDetails(String rollnumber)
-	{
-		
-		String query="Select * from student where Roll_No = '" + rollnumber + "'";
-		try
-		{
-//			PreparedStatement pStatement1 = con.prepareStatement(query);
-			Statement st=con.createStatement();
-			ResultSet rs=st.executeQuery(query);
-			if(rs.next()) {
-				setName(rs.getString(2));
-				setCourse(rs.getString(3));
-				setRollNumber(rs.getString(4));
-				setDOB(rs.getString(5));
-				setContact(rs.getString(6));
-				setEmail(rs.getString(7));
-				System.out.print("Hello");
-				return true;
-			}
-			return false;
-		}
-		catch(Exception e)
-		{
-			System.out.print("Error");
-			e.printStackTrace();
-			return false;
-		}
-		
+	// Database connection
+	private Connection getConnection() {
+		return DataBaseConnection.getConnection();
 	}
-	
-	public boolean insertStudentDetails()
-	{
-		
-		String query="insert into Student (Name, Course, Roll_No, DateOfBirth, Contact, EmailID, Student_Id, Password) values (?, ?, ?, ?, ?, ?, ?, ?)";
-		try
-		{
-			PreparedStatement pStatement1 = con.prepareStatement(query);
-			pStatement1.setString(1, getName());
-			pStatement1.setString(2, getCourse());
-			pStatement1.setString(3, getRollNumber());
-			pStatement1.setString(4, getDOB());
-			pStatement1.setString(5, getContact());
-			pStatement1.setString(6, getEmail());
-			pStatement1.setString(7, generateUserId());
-			pStatement1.setString(8, generatePassword());
-			
-			int rowInserted = pStatement1.executeUpdate();
-			if(rowInserted > 0) {
-				return true;
+
+	// Fetch student details
+	public boolean getStudentDetails(String rollNumber) {
+		String query = "SELECT * FROM Student WHERE Roll_No = ?";
+		try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(query)) {
+			ps.setString(1, rollNumber);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					setName(rs.getString("Name"));
+					setCourse(rs.getString("Course"));
+					setRollNumber(rs.getString("Roll_No"));
+					setDOB(rs.getString("DateOfBirth"));
+					setContact(rs.getString("Contact"));
+					setEmail(rs.getString("EmailID"));
+					return true;
+				}
+				return false;
 			}
-			return false;
-			
-		}
-		catch(Exception e)
-		{
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
-	public boolean updateStudentDetails(String rollno)
-	{
-		
-		String query="update Student set Name = ?, Course = ?, Roll_No = ?, DateOfBirth = ?, Contact = ?, EmailID = ?, Student_Id = ?, Password = ?  where Roll_No = '" + rollno + "'";
-		try
-		{
-			PreparedStatement pStatement1 = con.prepareStatement(query);
-			pStatement1.setString(1, getName());
-			pStatement1.setString(2, getCourse());
-			pStatement1.setString(3, getRollNumber());
-			pStatement1.setString(4, getDOB());
-			pStatement1.setString(5, getContact());
-			pStatement1.setString(6, getEmail());
-			pStatement1.setString(7, generateUserId());
-			pStatement1.setString(8, generatePassword());
-			
-			int rowUpdated = pStatement1.executeUpdate();
-			if(rowUpdated > 0) {
-				return true;
-			}
-			return false;
-			
-		}
-		catch(Exception e)
-		{
+
+	// Insert student details
+	public boolean insertStudentDetails() {
+		String query = "INSERT INTO Student (Name, Course, Roll_No, DateOfBirth, Contact, EmailID, Student_Id, Password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(query)) {
+			ps.setString(1, getName());
+			ps.setString(2, getCourse());
+			ps.setString(3, getRollNumber());
+			ps.setString(4, getDOB());
+			ps.setString(5, getContact());
+			ps.setString(6, getEmail());
+			ps.setString(7, generateUserId());
+			ps.setString(8, generatePassword());
+
+			int rowsInserted = ps.executeUpdate();
+			return rowsInserted > 0;
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
-	public boolean deleteStudentDetails(String rollno)
-	{
-		String query1="delete from Student where Roll_No = '" + rollno + "'";
-		try
-		{
-			PreparedStatement pStatement1 = con.prepareStatement(query1);
-			int rowDeleted = pStatement1.executeUpdate();
-			if(rowDeleted > 0) {
-				return true;
-			}
-			return false;
-		}
-		catch(Exception e)
-		{
+
+	// Update student details
+	public boolean updateStudentDetails(String rollNumber) {
+		String query = "UPDATE Student SET Name = ?, Course = ?, DateOfBirth = ?, Contact = ?, EmailID = ?, Student_Id = ?, Password = ? WHERE Roll_No = ?";
+		try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(query)) {
+			ps.setString(1, getName());
+			ps.setString(2, getCourse());
+			ps.setString(3, getDOB());
+			ps.setString(4, getContact());
+			ps.setString(5, getEmail());
+			ps.setString(6, generateUserId());
+			ps.setString(7, generatePassword());
+			ps.setString(8, rollNumber);
+
+			int rowsUpdated = ps.executeUpdate();
+			return rowsUpdated > 0;
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
+
+	// Delete student details
+	public boolean deleteStudentDetails(String rollNumber) {
+		String query = "DELETE FROM Student WHERE Roll_No = ?";
+		try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(query)) {
+			ps.setString(1, rollNumber);
+
+			int rowsDeleted = ps.executeUpdate();
+			return rowsDeleted > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	// Submit feedback
+	public boolean submitFeedback(String rollno, String feedback) {
+		String query = "INSERT INTO Feedback (Roll_No, Feedback) VALUES (?, ?)";
+		try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(query)) {
+			ps.setString(1, rollno);
+			ps.setString(2, feedback);
+
+			int rowsInserted = ps.executeUpdate();
+			return rowsInserted > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }
